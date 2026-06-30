@@ -13,20 +13,41 @@ interface FormState {
 
 const initialForm: FormState = { name: "", description: "" };
 
-const ACCEPTED_MIME = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf", "text/csv"];
-const ACCEPTED_TYPES = "image/*,.pdf,.csv,text/csv";
+const ACCEPTED_MIME = [
+  "image/jpeg", "image/png", "image/gif", "image/webp",
+  "application/pdf",
+  "text/csv",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/zip", "application/x-zip-compressed", "application/octet-stream",
+];
+const ACCEPTED_TYPES = "image/*,.pdf,.csv,text/csv,.doc,.docx,.zip";
 
 function detectFileType(file: File): FileType {
   if (file.type === "application/pdf") return "pdf";
   if (file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")) return "csv";
+  const name = file.name.toLowerCase();
+  if (
+    file.type === "application/msword" ||
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    name.endsWith(".doc") || name.endsWith(".docx")
+  ) return "doc";
+  if (
+    file.type === "application/zip" ||
+    file.type === "application/x-zip-compressed" ||
+    name.endsWith(".zip")
+  ) return "zip";
   return "image";
 }
 
 function isAccepted(file: File): boolean {
+  const name = file.name.toLowerCase();
   return (
     ACCEPTED_MIME.includes(file.type) ||
-    file.name.toLowerCase().endsWith(".csv") ||
-    file.type.startsWith("image/")
+    file.type.startsWith("image/") ||
+    name.endsWith(".csv") ||
+    name.endsWith(".doc") || name.endsWith(".docx") ||
+    name.endsWith(".zip")
   );
 }
 
@@ -44,6 +65,8 @@ function FilePreview({ file, previewUrl }: { file: File; previewUrl: string }) {
   const config = {
     pdf: { bg: "bg-red-50", icon: "text-red-400", label: "PDF File", color: "text-red-600" },
     csv: { bg: "bg-green-50", icon: "text-green-400", label: "CSV File", color: "text-green-600" },
+    doc: { bg: "bg-blue-50", icon: "text-blue-400", label: "Word Document", color: "text-blue-600" },
+    zip: { bg: "bg-yellow-50", icon: "text-yellow-500", label: "ZIP Archive", color: "text-yellow-600" },
     image: { bg: "bg-gray-50", icon: "text-gray-300", label: "", color: "" },
   };
   const { bg, icon, label, color } = config[fileType];
@@ -72,7 +95,7 @@ export default function AddDocument() {
 
   const applyFile = (selected: File) => {
     if (!isAccepted(selected)) {
-      setErrors((prev) => ({ ...prev, file: "Unsupported file type. Use Image, PDF, or CSV." }));
+      setErrors((prev) => ({ ...prev, file: "Unsupported file type. Use Image, PDF, CSV, DOC/DOCX, or ZIP." }));
       return;
     }
     setFile(selected);
@@ -135,7 +158,7 @@ export default function AddDocument() {
     const newErrors: Partial<FormState & { file: string }> = {};
     if (!form.name.trim()) newErrors.name = "Document name is required.";
     if (!form.description.trim()) newErrors.description = "Description is required.";
-    if (!file) newErrors.file = "Please upload a file (Image, PDF, or CSV).";
+    if (!file) newErrors.file = "Please upload a file (Image, PDF, CSV, DOC/DOCX, or ZIP).";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -217,7 +240,7 @@ export default function AddDocument() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             File <span className="text-red-500">*</span>{" "}
-            <span className="text-gray-400 font-normal">(Image, PDF, or CSV)</span>
+            <span className="text-gray-400 font-normal">(Image, PDF, CSV, DOC, or ZIP)</span>
           </label>
 
           <div
@@ -246,7 +269,7 @@ export default function AddDocument() {
                   Drag & drop or{" "}
                   <span className="text-blue-600 font-medium">click to upload</span>
                 </p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF, PDF, CSV</p>
+                <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF, PDF, CSV, DOC, DOCX, ZIP</p>
               </>
             )}
           </div>

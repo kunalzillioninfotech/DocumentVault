@@ -12,6 +12,8 @@ function FileTypeBadge({ type }: { type: IDocument["fileType"] }) {
     image: "bg-blue-100 text-blue-700",
     pdf: "bg-red-100 text-red-700",
     csv: "bg-green-100 text-green-700",
+    doc: "bg-indigo-100 text-indigo-700",
+    zip: "bg-yellow-100 text-yellow-700",
   };
   return (
     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${styles[type]}`}>
@@ -28,6 +30,8 @@ function FileThumbnail({ doc, size = "lg" }: { doc: IDocument; size?: "sm" | "lg
   const icons = {
     pdf: { bg: "bg-red-50", color: "text-red-400", label: "PDF" },
     csv: { bg: "bg-green-50", color: "text-green-400", label: "CSV" },
+    doc: { bg: "bg-indigo-50", color: "text-indigo-400", label: "DOC" },
+    zip: { bg: "bg-yellow-50", color: "text-yellow-500", label: "ZIP" },
     image: { bg: "bg-gray-50", color: "text-gray-300", label: "" },
   };
   const { bg, color, label } = icons[doc.fileType];
@@ -84,7 +88,7 @@ function CardActions({ doc, deletingId, onView, onDelete }: CardActionsProps) {
         disabled={!doc.fileUrl}
         className="flex-1 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg py-2 hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        {doc.fileType === "image" ? "View" : doc.fileType === "csv" ? "Download" : "Open"}
+        {doc.fileType === "image" ? "View" : doc.fileType === "pdf" ? "Open" : "Download"}
       </button>
       <button
         onClick={onDelete}
@@ -136,12 +140,12 @@ export default function Documents() {
   const handleView = (doc: IDocument) => {
     if (doc.fileType === "image") {
       setSelectedDoc(doc);
-    } else if (doc.fileType === "csv") {
+    } else if (doc.fileType === "pdf") {
+      window.open(`/api/documents/${doc._id}/download?disposition=inline`, "_blank", "noopener,noreferrer");
+    } else {
       const a = document.createElement("a");
       a.href = `/api/documents/${doc._id}/download`;
       a.click();
-    } else {
-      window.open(`/api/documents/${doc._id}/download?disposition=inline`, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -256,7 +260,7 @@ export default function Documents() {
 
               <p className="text-gray-500 text-sm line-clamp-1 hidden sm:block">{doc.description}</p>
 
-              <div className="hidden sm:flex items-center gap-2 whitespace-nowrap">
+              <div className="hidden sm:flex items-center justify-between gap-2 whitespace-nowrap">
                 <p className="text-xs text-gray-400">
                   {new Date(doc.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                 </p>
@@ -279,7 +283,7 @@ export default function Documents() {
                   disabled={!doc.fileUrl}
                   className="flex-1 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg py-1.5 hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {doc.fileType === "image" ? "View" : doc.fileType === "csv" ? "Download" : "Open"}
+                  {doc.fileType === "image" ? "View" : doc.fileType === "pdf" ? "Open" : "Download"}
                 </button>
                 <button
                   onClick={() => handleDelete(doc)}

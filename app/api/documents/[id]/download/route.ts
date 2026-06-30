@@ -7,12 +7,9 @@ const CONTENT_TYPES: Record<string, string> = {
   csv: "text/csv",
   pdf: "application/pdf",
   image: "application/octet-stream",
-};
-
-const EXTENSIONS: Record<string, string> = {
-  csv: ".csv",
-  pdf: ".pdf",
-  image: "",
+  zip: "application/zip",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 };
 
 export async function GET(
@@ -46,8 +43,26 @@ export async function GET(
     }
 
     const buffer = await upstream.arrayBuffer();
-    const contentType = CONTENT_TYPES[doc.fileType] ?? "application/octet-stream";
-    const ext = EXTENSIONS[doc.fileType] ?? "";
+
+    // For "doc" fileType, figure out actual extension (.doc vs .docx)
+    let ext = "";
+    let typeKey: string = doc.fileType;
+
+    if (doc.fileType === "doc") {
+      const isDocx =
+        signedUrl.toLowerCase().endsWith(".docx") ||
+        upstream.headers.get("content-type")?.includes("wordprocessingml");
+      typeKey = isDocx ? "docx" : "doc";
+      ext = isDocx ? ".docx" : ".doc";
+    } else if (doc.fileType === "csv") {
+      ext = ".csv";
+    } else if (doc.fileType === "pdf") {
+      ext = ".pdf";
+    } else if (doc.fileType === "zip") {
+      ext = ".zip";
+    }
+
+    const contentType = CONTENT_TYPES[typeKey] ?? "application/octet-stream";
     const filename = `${doc.name}${ext}`.replace(/"/g, "'");
     const disposition = inline ? "inline" : "attachment";
 

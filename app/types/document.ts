@@ -1,4 +1,4 @@
-export type FileType = "image" | "pdf" | "csv";
+export type FileType = "image" | "pdf" | "csv" | "doc" | "zip";
 
 export type ViewMode = "grid" | "list";
 

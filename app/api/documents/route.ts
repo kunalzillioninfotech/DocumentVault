@@ -47,13 +47,25 @@ export async function POST(req: NextRequest) {
 
     if (file && file.size > 0) {
       const mimeType = file.type;
+      const fileName = file.name.toLowerCase();
       if (mimeType === "application/pdf") fileType = "pdf";
-      else if (mimeType === "text/csv" || file.name.toLowerCase().endsWith(".csv")) fileType = "csv";
+      else if (mimeType === "text/csv" || fileName.endsWith(".csv")) fileType = "csv";
+      else if (
+        mimeType === "application/msword" ||
+        mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        fileName.endsWith(".doc") || fileName.endsWith(".docx")
+      ) fileType = "doc";
+      else if (
+        mimeType === "application/zip" || mimeType === "application/x-zip-compressed" ||
+        fileName.endsWith(".zip")
+      ) fileType = "zip";
       else fileType = "image";
 
       const buffer = Buffer.from(await file.arrayBuffer());
       const resourceType = fileType === "image" ? "image" : "raw";
-      const formatMap: Record<string, string> = { pdf: "pdf", csv: "csv" };
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+      const formatMap: Record<string, string> = { pdf: "pdf", csv: "csv", zip: "zip" };
+      const docFormat = ext === "docx" ? "docx" : "doc";
 
       const uploadResult = await new Promise<{ secure_url: string; public_id: string }>(
         (resolve, reject) => {
@@ -63,7 +75,7 @@ export async function POST(req: NextRequest) {
                 folder: "document-management",
                 resource_type: resourceType,
                 public_id: `${Date.now()}-${file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, "-")}`,
-                ...(formatMap[fileType] ? { format: formatMap[fileType] } : {}),
+                ...(fileType === "doc" ? { format: docFormat } : formatMap[fileType] ? { format: formatMap[fileType] } : {}),
               },
               (error, result) => {
                 if (error || !result) reject(error ?? new Error("Upload failed"));
