@@ -7,8 +7,8 @@ export default async function Navbar() {
 
   return (
     <nav className="bg-blue-700 text-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tight hover:text-blue-200 transition-colors">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+        <Link href="/" className="text-2xl font-bold tracking-tight hover:text-blue-200 transition-colors shrink-0">
           DocumentVault
         </Link>
 
@@ -18,7 +18,8 @@ export default async function Navbar() {
               href="/"
               className="text-sm font-medium hover:text-blue-200 transition-colors"
             >
-              Documents
+              <span className="sm:hidden">Docs</span>
+              <span className="hidden sm:inline">Documents</span>
             </Link>
             <Link
               href="/add-document"
