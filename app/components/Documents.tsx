@@ -207,9 +207,22 @@ export default function Documents() {
                   <FileTypeBadge type={doc.fileType} />
                 </div>
                 <p className="text-gray-500 text-sm line-clamp-2 flex-1">{doc.description}</p>
-                <p className="text-xs text-gray-400 mt-3 mb-4">
-                  {new Date(doc.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-3 mb-4">
+                  <p className="text-xs text-gray-400">
+                    {new Date(doc.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                  </p>
+                  {doc.fileType === "pdf" && doc.fileUrl && (
+                    <a
+                      href={`/api/documents/${doc._id}/download`}
+                      title="Download PDF"
+                      className="text-red-400 hover:text-red-600 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
                 <CardActions doc={doc} deletingId={deletingId} onView={() => handleView(doc)} onDelete={() => handleDelete(doc)} />
               </div>
             </div>
@@ -243,9 +256,22 @@ export default function Documents() {
 
               <p className="text-gray-500 text-sm line-clamp-1 hidden sm:block">{doc.description}</p>
 
-              <p className="text-xs text-gray-400 hidden sm:block whitespace-nowrap">
-                {new Date(doc.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-              </p>
+              <div className="hidden sm:flex items-center gap-2 whitespace-nowrap">
+                <p className="text-xs text-gray-400">
+                  {new Date(doc.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                </p>
+                {doc.fileType === "pdf" && doc.fileUrl && (
+                  <a
+                    href={`/api/documents/${doc._id}/download`}
+                    title="Download PDF"
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </a>
+                )}
+              </div>
 
               <div className="flex gap-2 w-full sm:w-40">
                 <button
